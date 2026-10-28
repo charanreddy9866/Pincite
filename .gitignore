@@ -1,0 +1,26 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# App data (case files never belong in git)
+backend/data/
+*.db
+
+# Frontend build output
+node_modules/
+.next/
+frontend/out/
+backend/static/
+*.tsbuildinfo
+
+# Secrets
+.env
+.env.local
+.env.*.local
+
+.DS_Store
+.vscode/
+.idea/
