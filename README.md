@@ -4,6 +4,8 @@ Ask questions of a case file and get answers where every quote is checked agains
 
 *A pin cite is a citation to the exact page where a statement appears. That's what every answer here comes with.*
 
+**Live demo:** https://pincite.onrender.com (access code on request; the free instance takes about a minute to wake up)
+
 Pincite is an AI research assistant for litigation documents. Add a case's PDFs (complaints, deposition transcripts, exhibits, scanned records) and it will:
 
 - **Answer questions with checked citations.** A tool-calling agent searches the case, answers in plain English, and cites exhibit, page and exact quote. The application then verifies each quote against the stored page text and strikes through any it can't find.
