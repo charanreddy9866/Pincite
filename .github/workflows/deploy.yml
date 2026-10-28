@@ -1,6 +1,6 @@
 # Manual deploy to Cloud Run using Workload Identity Federation (no long-lived keys in GitHub).
 # Required repository variables: GCP_PROJECT, GCP_REGION, GCP_WIF_PROVIDER, GCP_DEPLOY_SA.
-# Secrets pincite-openai-key and pincite-access-code must already exist (run deploy/cloudrun.sh once).
+# Secrets pincite-gemini-key and pincite-access-code must already exist (run deploy/cloudrun.sh once).
 name: Deploy to Cloud Run
 
 on:
@@ -28,4 +28,4 @@ jobs:
             --source . \
             --allow-unauthenticated \
             --memory 1Gi --max-instances 1 --timeout 300 \
-            --set-secrets "OPENAI_API_KEY=pincite-openai-key:latest,ACCESS_CODE=pincite-access-code:latest"
+            --set-secrets "GEMINI_API_KEY=pincite-gemini-key:latest,ACCESS_CODE=pincite-access-code:latest"

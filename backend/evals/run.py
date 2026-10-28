@@ -1,7 +1,7 @@
 """Evaluate Pincite on the sample case.
 
     python -m evals.run --mode retrieval   # offline: does search find the right page? (runs in CI)
-    python -m evals.run --mode full        # needs OPENAI_API_KEY: grades real answers end to end
+    python -m evals.run --mode full        # needs GEMINI_API_KEY or OPENAI_API_KEY: grades real answers end to end
 
 Full mode grades each question on:
 - outcome:      answerable questions get an answer; unanswerable ones get "not found"
@@ -61,7 +61,7 @@ async def run_retrieval(k: int) -> dict:
 async def run_full() -> dict:
     llm = get_llm()
     if not llm.enabled:
-        sys.exit("Full evals need OPENAI_API_KEY.")
+        sys.exit("Full evals need GEMINI_API_KEY or OPENAI_API_KEY.")
     db, case_id = await load_case(llm)
     rows = []
     for item in GOLDEN:

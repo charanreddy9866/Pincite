@@ -113,7 +113,7 @@ async def ingest_pdf(db: Database, llm: LLM, case_id: int, filename: str, pdf_by
         for piece in chunk_text(text, settings.chunk_size, settings.chunk_overlap)
     ]
     vectors: list[bytes | None] = [None] * len(chunk_rows)
-    if llm.enabled and chunk_rows:
+    if getattr(llm, "embeddings_enabled", llm.enabled) and chunk_rows:
         vectors = [to_blob(v) for v in await llm.embed([t for _, t in chunk_rows])]
     db.executemany(
         "INSERT INTO chunks (case_id, document_id, page_no, text, embedding) VALUES (?, ?, ?, ?, ?)",

@@ -1,4 +1,5 @@
 # One-click deploy on Render: the same container as Cloud Run (UI + API in one service).
+# Uses Google Gemini's free tier by default. To use OpenAI instead, add OPENAI_API_KEY in the dashboard.
 services:
   - type: web
     name: pincite
@@ -8,7 +9,7 @@ services:
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
-      - key: OPENAI_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
       - key: ACCESS_CODE
         sync: false

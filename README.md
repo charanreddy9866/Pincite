@@ -37,7 +37,7 @@ A plain-English version for non-technical users is in [docs/for-attorneys.md](do
               │
    ┌──────────▼──────────┐   pdfplumber text layer; Tesseract OCR for scanned pages
    │ extract → redact →  │   SSN / card (Luhn) / account / phone / email removed here
-   │ chunk → embed       │   ~900-char overlapping chunks, OpenAI embeddings (optional)
+   │ chunk → embed       │   ~900-char overlapping chunks, embeddings (optional)
    └──────────┬──────────┘
               ▼
         SQLite: cases · documents · pages · chunks · events · audit
@@ -70,6 +70,15 @@ A plain-English version for non-technical users is in [docs/for-attorneys.md](do
 | `frontend/components/` | Ask, chronology, documents, activity, page viewer |
 | `docs/decisions/` | Why it's built this way |
 
+## AI providers
+
+Pincite talks to models through the OpenAI SDK, so it works with:
+
+- **Google Gemini (free tier)**: set `GEMINI_API_KEY`. Uses `gemini-3.5-flash-lite` through Gemini's OpenAI-compatible endpoint, with keyword search only to save the free daily quota.
+- **OpenAI**: set `OPENAI_API_KEY`. Uses `gpt-4o-mini` with strict structured outputs and hybrid keyword + embedding search.
+
+If a provider rejects the strict JSON schema, Pincite retries in plain JSON mode with the schema in the prompt. Either way, citations are checked by code, not trusted from the model. Rate limits and bad keys come back as clear messages, not crashes.
+
 ## Run it locally
 
 ```bash
@@ -77,7 +86,7 @@ A plain-English version for non-technical users is in [docs/for-attorneys.md](do
 cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
-cp .env.example .env             # add OPENAI_API_KEY, or leave it empty to run without AI
+cp .env.example .env             # add a GEMINI_API_KEY (free) or OPENAI_API_KEY, or neither to run without AI
 uvicorn app.main:app --reload    # http://localhost:8000/docs
 
 # frontend
@@ -94,9 +103,9 @@ Without an API key, everything except AI answers still works: search returns the
 
 ```bash
 cd backend
-python -m pytest                        # 21 tests, offline, uses a scripted fake model
+python -m pytest                        # 26 tests, offline, uses a scripted fake model
 python -m evals.run --mode retrieval    # offline: is the right page in the top 6? (CI gate: 90%)
-python -m evals.run --mode full         # needs OPENAI_API_KEY: grades real answers
+python -m evals.run --mode full         # needs an API key: grades real answers
 ```
 
 The golden set has 19 questions: 14 answerable, 1 prompt-injection probe, and 4 the documents can't answer (including a request for the redacted SSN). Full mode reports:
@@ -113,7 +122,7 @@ CI runs the tests, the retrieval gate, lint and build, then builds the Docker im
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/charanreddy9866/Pincite)
 
-Render builds the same container from `render.yaml` and asks for `OPENAI_API_KEY` and an `ACCESS_CODE`. One URL serves both the UI and the API. The free tier sleeps when idle, so the first visit takes about a minute.
+Render builds the same container from `render.yaml` and asks for a free `GEMINI_API_KEY` (from [Google AI Studio](https://aistudio.google.com/apikey), no card needed) and an `ACCESS_CODE`. One URL serves both the UI and the API. The free tier sleeps when idle, so the first visit takes about a minute.
 
 ## Deploy to Google Cloud Run
 
@@ -126,7 +135,7 @@ gcloud config set project YOUR_PROJECT_ID
 The script:
 
 1. Enables Cloud Run, Cloud Build, Artifact Registry and Secret Manager.
-2. Stores your OpenAI key and an access code in Secret Manager.
+2. Stores your Gemini key (or OpenAI key with `PROVIDER=openai`) and an access code in Secret Manager.
 3. Builds the single container from source and deploys it, capped at one instance.
 
 There's also a manual GitHub Actions workflow (`deploy.yml`) using Workload Identity Federation, so no service-account keys live in GitHub.

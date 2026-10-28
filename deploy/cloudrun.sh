@@ -36,7 +36,15 @@ ensure_secret() {
     --member "serviceAccount:${RUNTIME_SA}" --role roles/secretmanager.secretAccessor >/dev/null
 }
 
-ensure_secret pincite-openai-key "OpenAI API key"
+# PROVIDER=gemini (default, free tier) or PROVIDER=openai
+PROVIDER="${PROVIDER:-gemini}"
+if [[ "$PROVIDER" == "openai" ]]; then
+  ensure_secret pincite-openai-key "OpenAI API key"
+  KEY_SECRET="OPENAI_API_KEY=pincite-openai-key:latest"
+else
+  ensure_secret pincite-gemini-key "Gemini API key (free at https://aistudio.google.com/apikey)"
+  KEY_SECRET="GEMINI_API_KEY=pincite-gemini-key:latest"
+fi
 ensure_secret pincite-access-code "Access code people will type to open the workspace"
 
 # max-instances=1: case data lives in one SQLite file per instance (see docs/decisions/0004).
@@ -50,7 +58,7 @@ gcloud run deploy "$SERVICE" \
   --min-instances 0 \
   --max-instances 1 \
   --timeout 300 \
-  --set-secrets "OPENAI_API_KEY=pincite-openai-key:latest,ACCESS_CODE=pincite-access-code:latest"
+  --set-secrets "${KEY_SECRET},ACCESS_CODE=pincite-access-code:latest"
 
 URL="$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.url)')"
 echo

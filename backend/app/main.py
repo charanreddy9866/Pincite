@@ -3,6 +3,7 @@ import io
 import json
 from pathlib import Path
 
+import openai
 from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response
@@ -74,9 +75,25 @@ def health():
     return {
         "status": "ok",
         "ai_enabled": s.llm_enabled,
+        "provider": s.provider,
         "model": s.chat_model if s.llm_enabled else None,
         "access_code_required": bool(s.access_code),
     }
+
+
+@app.exception_handler(openai.APIError)
+async def ai_provider_error(request: Request, exc: openai.APIError):
+    """Turn model-provider failures into messages a user can act on."""
+    if isinstance(exc, openai.RateLimitError):
+        status, msg = 429, ("The AI provider's usage limit was reached. Free tiers allow a limited number of "
+                            "requests per day, so try again later.")
+    elif isinstance(exc, (openai.AuthenticationError, openai.PermissionDeniedError)):
+        status, msg = 502, "The AI provider rejected the API key configured on this server."
+    elif isinstance(exc, openai.NotFoundError):
+        status, msg = 502, f"The AI model '{get_settings().chat_model}' isn't available for this API key."
+    else:
+        status, msg = 502, "The AI provider returned an error. Try again in a moment."
+    return JSONResponse({"detail": msg}, status_code=status)
 
 
 @app.get("/api/cases")
