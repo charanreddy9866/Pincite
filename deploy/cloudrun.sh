@@ -19,6 +19,11 @@ gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregi
 PROJECT_NUMBER="$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')"
 RUNTIME_SA="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
 
+# Newer projects build source deploys as the default compute account, which needs this role.
+gcloud projects add-iam-policy-binding "$PROJECT" \
+  --member "serviceAccount:${RUNTIME_SA}" --role roles/run.builder --condition None >/dev/null \
+  || echo "Couldn't grant roles/run.builder (you may need Owner on the project). Continuing."
+
 ensure_secret() {
   local name="$1" prompt="$2" value
   if gcloud secrets describe "$name" --project "$PROJECT" >/dev/null 2>&1; then
