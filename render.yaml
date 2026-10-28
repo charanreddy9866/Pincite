@@ -1,0 +1,14 @@
+# One-click deploy on Render: the same container as Cloud Run (UI + API in one service).
+services:
+  - type: web
+    name: pincite
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ACCESS_CODE
+        sync: false

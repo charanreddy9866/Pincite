@@ -109,6 +109,12 @@ Current offline retrieval result: **Recall@6 = 100%, MRR = 0.81**.
 
 CI runs the tests, the retrieval gate, lint and build, then builds the Docker image and smoke-tests the container.
 
+## Quick deploy (free)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/charanreddy9866/Pincite)
+
+Render builds the same container from `render.yaml` and asks for `OPENAI_API_KEY` and an `ACCESS_CODE`. One URL serves both the UI and the API. The free tier sleeps when idle, so the first visit takes about a minute.
+
 ## Deploy to Google Cloud Run
 
 ```bash
